@@ -22,7 +22,7 @@ namespace _Coin_Game.Scripts.Game.Coin
 
         private void Update()
         {
-            rigidbody.velocity=Vector3.right*10;
+            rigidbody.velocity=-transform.right*5;
 #if UNITY_EDITOR
             CheckSwipeDesktop();
 
