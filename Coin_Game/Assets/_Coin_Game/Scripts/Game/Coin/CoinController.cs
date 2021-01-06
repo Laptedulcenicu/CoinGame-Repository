@@ -1,82 +1,104 @@
 ﻿using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _Coin_Game.Scripts.Game.Coin
 {
     public class CoinController : MonoBehaviour
     {
+        [SerializeField] private SwipeDetector swipeDetector;
         [SerializeField] private int maxAngle;
         [SerializeField] private int minAngle;
         [SerializeField] private float speedRotation;
 
         private Rigidbody rigidbody;
         private List<Transform> coinTailList = new List<Transform>();
-        private SwipeData swipeData = new SwipeData {Direction = SwipeDirection.None};
+        private Vector3 mVelocity;
 
         private void Awake()
         {
             rigidbody = GetComponent<Rigidbody>();
-            SwipeDetector.onSwipe += SwipeDetector_OnSwipe;
+            DOTween.SetTweensCapacity(500, 50);
         }
 
 
         private void Update()
         {
-            rigidbody.velocity=-transform.right*5;
-#if UNITY_EDITOR
             CheckSwipeDesktop();
-
+#if UNITY_IPHONE
+      //     CheckSwipeMobileV2();
 #endif
 
 #if UNITY_ANDROID
-            CheckSwipeMobile();
+            //        CheckSwipeMobileV2();
 #endif
 
-#if UNITY_IOS
-                CheckSwipeMobile();
-#endif
+            transform.Translate(mVelocity.normalized * Time.deltaTime * 5);
         }
 
-        private void CheckSwipeMobile()
+        private void CheckSwipeMobileV2()
         {
-            if (swipeData.Direction != SwipeDirection.None)
+            mVelocity = Vector3.zero;
+            mVelocity.x = -1f;
+
+            if (swipeDetector.Direction != 0)
             {
                 var rotation = rigidbody.rotation;
-                if (swipeData.Direction == SwipeDirection.Left)
+
+                if (swipeDetector.Direction > 0)
                 {
-                    rigidbody.rotation = Quaternion.Euler(Vector3.MoveTowards(rotation.eulerAngles,
-                        new Vector3(rotation.eulerAngles.x, maxAngle, rotation.eulerAngles.z),
-                        Time.deltaTime * speedRotation));
+                    mVelocity.x = (rotation.eulerAngles.x - 180) / (maxAngle - 180);
+                    rigidbody.DORotate(new Vector3(rotation.eulerAngles.x, maxAngle, rotation.eulerAngles.z),
+                        speedRotation, RotateMode.FastBeyond360);
                 }
-                else if (swipeData.Direction == SwipeDirection.Right)
+                else
                 {
-                    rigidbody.rotation = Quaternion.Euler(Vector3.MoveTowards(rotation.eulerAngles,
-                        new Vector3(rotation.eulerAngles.x, minAngle, rotation.eulerAngles.z),
-                        Time.deltaTime * speedRotation));
+                    mVelocity.x = (rotation.eulerAngles.x - minAngle) / (180 - minAngle);
+                    rigidbody.DORotate(new Vector3(rotation.eulerAngles.x, minAngle, rotation.eulerAngles.z),
+                        speedRotation, RotateMode.FastBeyond360);
                 }
+            }
+            else
+            {
+                rigidbody.DOKill();
+            }
+        }
+        
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("Coin"))
+            {
+              //  other.transform.
             }
         }
 
         private void CheckSwipeDesktop()
         {
-            var rotation = rigidbody.rotation;
-            if (Input.GetAxis("Horizontal") > 0)
-            {
-                rigidbody.rotation = Quaternion.Euler(Vector3.MoveTowards(rotation.eulerAngles,
-                    new Vector3(rotation.eulerAngles.x, maxAngle, rotation.eulerAngles.z),
-                    Time.deltaTime * speedRotation));
-            }
-            else if (Input.GetAxis("Horizontal") < 0)
-            {
-                rigidbody.rotation = Quaternion.Euler(Vector3.MoveTowards(rotation.eulerAngles,
-                    new Vector3(rotation.eulerAngles.x, minAngle, rotation.eulerAngles.z),
-                    Time.deltaTime * speedRotation));
-            }
-        }
+            mVelocity = Vector3.zero;
+            mVelocity.x = -1f;
 
-        private void SwipeDetector_OnSwipe(SwipeData data)
-        {
-            swipeData = data;
+            if (Input.GetAxis("Horizontal") != 0)
+            {
+                var rotation = rigidbody.rotation;
+
+                if (Input.GetAxis("Horizontal") > 0)
+                {
+                    mVelocity.x = (rotation.eulerAngles.x - 180) / (maxAngle - 180);
+
+                    rigidbody.DORotate(new Vector3(rotation.eulerAngles.x, maxAngle, rotation.eulerAngles.z),
+                        speedRotation).SetEase(Ease.Linear);
+                }
+                else
+                {
+                    mVelocity.x = (rotation.eulerAngles.x - minAngle) / (180 - minAngle);
+                    rigidbody.DORotate(new Vector3(rotation.eulerAngles.x, minAngle, rotation.eulerAngles.z),
+                        speedRotation).SetEase(Ease.Linear);
+                }
+            }
+            else
+            {
+                rigidbody.DOKill();
+            }
         }
     }
 }
