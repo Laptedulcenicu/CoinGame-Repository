@@ -6,9 +6,11 @@ namespace _Coin_Game.Scripts.Game.Platform
     {
         [SerializeField] private Transform startTarget;
         [SerializeField] private Transform endTarget;
-
         public Transform StartTarget => startTarget;
 
         public Transform EndTarget => endTarget;
+        
+        
+        
     }
 }
