@@ -18,7 +18,7 @@ namespace _Coin_Game.Scripts.Game.Coin
         [SerializeField] private int minAngle;
         [SerializeField] private float speedRotation;
 
-        private Rigidbody rigidbody;
+        private new Rigidbody rigidbody;
         private List<Transform> coinTailList = new List<Transform>();
         private Vector3 mVelocity;
         private bool canMove;
@@ -46,13 +46,16 @@ namespace _Coin_Game.Scripts.Game.Coin
         {
             if (canMove)
             {
+#if UNITY_EDITOR
                 CheckSwipeDesktop();
+#endif
+
 #if UNITY_IPHONE
-      //     CheckSwipeMobileV2();
+           CheckSwipeMobile();
 #endif
 
 #if UNITY_ANDROID
-                //        CheckSwipeMobileV2();
+                CheckSwipeMobile();
 #endif
 
                 transform.Translate(mVelocity.normalized * Time.deltaTime * 5);
@@ -61,7 +64,6 @@ namespace _Coin_Game.Scripts.Game.Coin
 
         private void OnTriggerEnter(Collider other)
         {
-            print("iuy");
             if (other.CompareTag("Coin"))
             {
                 UIManager.CoinTextValue(1);
@@ -70,7 +72,6 @@ namespace _Coin_Game.Scripts.Game.Coin
             }
             else if (other.CompareTag("Damage"))
             {
-                print("ye[");
                 UIManager.CoinTextValue(-1);
 
                 RemoveCoin(other.gameObject);
@@ -93,7 +94,7 @@ namespace _Coin_Game.Scripts.Game.Coin
         private void AddNewCoin(Transform newCoin)
         {
             var currentSelectableCoin = newCoin.GetComponent<SelectableCoin>();
-            
+
             currentSelectableCoin.targetCoin = coinTailList.Last();
             currentSelectableCoin.offset = distanceBetweenCoins;
             currentSelectableCoin.minAngle = minAngle;
@@ -136,7 +137,7 @@ namespace _Coin_Game.Scripts.Game.Coin
             }
         }
 
-        private void CheckSwipeMobileV2()
+        private void CheckSwipeMobile()
         {
             mVelocity = Vector3.zero;
             mVelocity.x = -1f;

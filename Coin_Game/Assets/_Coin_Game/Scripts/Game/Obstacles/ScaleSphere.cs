@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _Coin_Game.Scripts.Game.Obstacles
@@ -18,6 +19,12 @@ namespace _Coin_Game.Scripts.Game.Obstacles
             {
                 transform.DOScale(currentScale, 2f).OnComplete(Start);
             });
+        }
+
+
+        private void OnDestroy()
+        {
+            transform.DOKill();
         }
     }
 }

@@ -21,5 +21,10 @@ namespace _Coin_Game.Scripts.Game.Obstacles
                 transform.DOLocalRotate(currentRotation, 2f, RotateMode.FastBeyond360).OnComplete(Start);
             });
         }
+        
+        private void OnDestroy()
+        {
+            transform.DOKill();
+        }
     }
 }

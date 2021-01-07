@@ -19,5 +19,10 @@ namespace _Coin_Game.Scripts.Game.Obstacles
                 transform.DOLocalMove(currentScale, 2f).OnComplete(Start);
             });
         }
+        
+        private void OnDestroy()
+        {
+            transform.DOKill();
+        }
     }
 }
