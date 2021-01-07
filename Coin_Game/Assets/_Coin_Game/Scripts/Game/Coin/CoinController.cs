@@ -28,6 +28,7 @@ namespace _Coin_Game.Scripts.Game.Coin
             MoveState += SetMoveState;
             rigidbody = GetComponent<Rigidbody>();
             DOTween.SetTweensCapacity(500, 50);
+            coinTailList.Add(transform);
         }
 
         private void OnDestroy()
@@ -60,19 +61,16 @@ namespace _Coin_Game.Scripts.Game.Coin
 
         private void OnTriggerEnter(Collider other)
         {
+            print("iuy");
             if (other.CompareTag("Coin"))
             {
                 UIManager.CoinTextValue(1);
                 other.enabled = false;
-                
-                var currentSelectableCoin = other.GetComponent<SelectableCoin>();
-                currentSelectableCoin.targetCoin = transform;
-                currentSelectableCoin.offset = distanceBetweenCoins;
-                
                 AddNewCoin(other.transform);
             }
             else if (other.CompareTag("Damage"))
             {
+                print("ye[");
                 UIManager.CoinTextValue(-1);
 
                 RemoveCoin(other.gameObject);
@@ -94,6 +92,13 @@ namespace _Coin_Game.Scripts.Game.Coin
 
         private void AddNewCoin(Transform newCoin)
         {
+            var currentSelectableCoin = newCoin.GetComponent<SelectableCoin>();
+            
+            currentSelectableCoin.targetCoin = coinTailList.Last();
+            currentSelectableCoin.offset = distanceBetweenCoins;
+            currentSelectableCoin.minAngle = minAngle;
+            currentSelectableCoin.maxAngle = maxAngle;
+
             coinTailList.Add(newCoin);
         }
 
@@ -106,7 +111,7 @@ namespace _Coin_Game.Scripts.Game.Coin
             }
             else
             {
-                Destroy(coinTailList.Last());
+                Destroy(coinTailList.Last().gameObject);
                 coinTailList.Remove(coinTailList.Last());
                 Destroy(touchedObject);
             }
@@ -123,8 +128,12 @@ namespace _Coin_Game.Scripts.Game.Coin
 
             sequence.Insert(0, transform.DOPath(pathAnimation, 2f));
             sequence.Insert(0, transform.DORotate(new Vector3(0, 180, 0), 1.2f));
-            sequence.Insert(0, transform.DOScale(Vector3.zero, 1f).SetDelay(1f));
             sequence.OnComplete(() => { UIManager.SetGameState(GameState.Win); });
+
+            foreach (var coin in coinTailList)
+            {
+                coin.DOScale(Vector3.zero, 0.5f).SetDelay(1f);
+            }
         }
 
         private void CheckSwipeMobileV2()
